@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Is it Vegan?</string>
+    <string name="v_def">veg·an (ˈvēɡən): noun - a person who does not eat or use animal products. adjective - using or containing no animal products</string>
+    <string name="start_but">Start Quiz!</string>
+    <string name="q_count">Question #1</string>
+    <string name="f">false</string>
+    <string name="t">true</string>
+</resources>
