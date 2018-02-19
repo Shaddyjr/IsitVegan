@@ -1,36 +1,60 @@
 package com.example.android.isitvegan;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.Html;
+import android.text.Spanned;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.util.LinkedList;
 import java.util.Random;
 
-
+// TODO: 2/18/2018 add onRestoreInstanceState and onSaveInstanceState
 public class MainActivity extends AppCompatActivity {
-    // storing all foods for quiz
+    // some transient state for the activity instance
+
+    ///////////
+    //GLOBALS//
+    ///////////
+    View intro, main;
+    LinearLayout end;
+    ImageView img; // one image view showing food image
+    TextView food_name, end_v, q;
     Food[] foods = new Food[10];
     int ind = 0; //index of current food
+    LayoutInflater layoutInflater;
+    TextView rowText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // call the super class onCreate to complete the creation of activity like
+        // the view hierarchy
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-//        Custom text will load on read device
+//      Custom text will load on real device
         TextView tx1 = (TextView)findViewById(R.id.title1);
         TextView tx2 = (TextView)findViewById(R.id.title2);
         Typeface custom_font = Typeface.createFromAsset(getAssets(),  "fonts/ConcertOne-Regular.ttf");
 
         tx1.setTypeface(custom_font);
         tx2.setTypeface(custom_font);
+
+//        Establishing globals
+        main= findViewById(R.id.main);
+        intro = findViewById(R.id.intro);
+        end= findViewById(R.id.end);
+        img = (ImageView)findViewById(R.id.img);
+        food_name = (TextView)findViewById(R.id.food_name);
+        end_v = (TextView) findViewById(R.id.end_text);
+        q = (TextView)findViewById(R.id.q);
 
         foods[rand_empty_element(foods)] = new Food("Oreos",true,"The Oreo filling is made with canola oil and corn syrup",R.drawable.oreo);
         foods[rand_empty_element(foods)] = new Food("Chipotle Sofritas",true,"Sofrita is tofu, which is a soy-based meat substitute",R.drawable.sof);
@@ -43,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         foods[rand_empty_element(foods)] = new Food("Dark Chocolate covered Almonds",true,"Dark Chocolate is not treated with milk, like Milk Chocolate is",R.drawable.choc);
         foods[rand_empty_element(foods)] = new Food("Falafel pita sandwich with hummus",true,"Falafel's are made with chickpeas, herbs, and spices. The Tahini sauce is made with sesame seeds.",R.drawable.fal);
 
-        showFood(foods[ind]);
+        layoutInflater = (LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     /**
@@ -63,51 +87,56 @@ public class MainActivity extends AppCompatActivity {
      * @param food is Food object
      */
     public void showFood (Food food){
-        ImageView img = (ImageView)findViewById(R.id.img);
         img.setImageResource(food.img);
-
-        TextView food_name = (TextView)findViewById(R.id.food_name);
         food_name.setText(food.name);
-
+        // updating question counter
+        q.setText(getString(R.string.q_count, "" + (ind+1)));
     }
 
-
     /**
-    * Switches "activity" windows by changing each view's visibility
+    * Switches "activity" windows by changing each view's visibility (shows main activity)
     */
     public void goToMainActivity(View v){
-        View intro = findViewById(R.id.intro);
         intro.setVisibility(View.GONE);
 
-        View main= findViewById(R.id.main);
+        // showing first food
+        showFood(foods[0]);
+
         main.setVisibility(View.VISIBLE);
     }
 
     /**
-     * Switches "activity" windows by changing each view's visibility
+     * Switches "activity" windows by changing each view's visibility (shows end activity)
      */
     public void goToFinalActivity(){
-        View main= findViewById(R.id.main);
         main.setVisibility(View.GONE);
-
-        View end= findViewById(R.id.end);
         end.setVisibility(View.VISIBLE);
     }
 
     /**
-     * Shows food error from quiz when wrong answer given
+     * Shows food error from quiz when wrong answer given by adding new view to last activity view
      * @param food is a Food object from a wrong answer
      */
     public void addError(Food food) {
-        TextView end_v = (TextView) findViewById(R.id.end_text);
-        String s = end_v.getText().toString();
 
-        s += "\n" + "Food: " + food.name;
-        s += "\n" + "Vegan? " + food.vegan;
-        s += "\n" + "Reason: " + food.explanation;
-        s += "\n" + "===============================";
 
-        end_v.setText(s);
+        String s = "";
+
+        s += "<br>" + "<b>Food:</b> " + food.name;
+        s += "<br>" + "<b>Vegan?</b> " + food.vegan;
+        s += "<br>" + "<b>Reason:</b> " + food.explanation;
+        s += "<br>" + "===============================";
+
+        addField(Html.fromHtml(s));
+    }
+
+    public void addField(Spanned str) {
+        final View addView = layoutInflater.inflate(R.layout.row, null);
+
+        rowText = (TextView)addView.findViewById(R.id.end_text);
+
+        end.addView(addView);
+        rowText.setText(str);
     }
 
     /**
@@ -116,14 +145,13 @@ public class MainActivity extends AppCompatActivity {
     public void nextFood(View v){
         Food food = foods[ind];
         String s = v.getTag().toString();
-//        tracking wrong answers
+        // tracking wrong answers
         if(s.equals("f") && food.vegan || s.equals("t") && !food.vegan){
-            Log.v("main","Incorrect! " + food.name);
             addError(food);
         }
 
         ind++;
-        //        ending on last
+        // ending on last
         if(ind>=foods.length){
             goToFinalActivity();
             return;
@@ -135,10 +163,6 @@ public class MainActivity extends AppCompatActivity {
         // resetting checkbox
         CheckBox checkBox = (CheckBox) v;
         checkBox.setChecked(false);
-
-//      update question counter
-        TextView q= (TextView)findViewById(R.id.q);
-        q.setText("Question #"+(ind+1));
     }
 
 }
