@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import java.util.Random;
 
-// TODO: 2/18/2018 add onRestoreInstanceState and onSaveInstanceState
 public class MainActivity extends AppCompatActivity {
     // some transient state for the activity instance
 
@@ -119,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public void addError(Food food) {
 
-
         String s = "";
 
         s += "<br>" + "<b>Food:</b> " + food.name;
@@ -129,7 +127,10 @@ public class MainActivity extends AppCompatActivity {
 
         addField(Html.fromHtml(s));
     }
-
+    /**
+     * Adds food error text to a new, dynamically added view to the last activity view
+     * @param str is a Spanned object from a Html.fromHtml call
+     */
     public void addField(Spanned str) {
         final View addView = layoutInflater.inflate(R.layout.row, null);
 
@@ -164,5 +165,4 @@ public class MainActivity extends AppCompatActivity {
         CheckBox checkBox = (CheckBox) v;
         checkBox.setChecked(false);
     }
-
 }
